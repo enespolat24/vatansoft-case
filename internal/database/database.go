@@ -37,6 +37,10 @@ func NewDbConnection() *DbConnection {
 	}
 }
 
+func (conn *DbConnection) GetDbInstance() *gorm.DB {
+	return conn.db
+}
+
 func (conn *DbConnection) CloseDbConnection() {
 	sqlDB, err := conn.db.DB()
 	if err != nil {

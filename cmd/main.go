@@ -3,6 +3,8 @@ package main
 import (
 	"log"
 	"vatansoft-case/internal/database"
+	"vatansoft-case/internal/handler"
+	"vatansoft-case/internal/repository"
 	routes "vatansoft-case/internal/route"
 
 	"github.com/joho/godotenv"
@@ -23,7 +25,10 @@ func main() {
 		e.Logger.Fatalf("Failed to migrate database: %v", err)
 	}
 
-	routes.InitRoutes(e)
+	userRepo := repository.NewUserRepository(dbConn.GetDbInstance())
+	userHandler := handler.NewUserHandler(userRepo)
+
+	routes.InitRoutes(e, userHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }
