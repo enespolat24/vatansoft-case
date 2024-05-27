@@ -1,4 +1,4 @@
-package auth
+package middleware
 
 import (
 	"net/http"
@@ -12,7 +12,7 @@ func CheckPermission(permission string) echo.MiddlewareFunc {
 	return func(next echo.HandlerFunc) echo.HandlerFunc {
 		return func(c echo.Context) error {
 			user := c.Get("user").(*model.User)
-			if !hasPermission(user.Role, permission) {
+			if !hasPermission(user.Role.Name, permission) {
 				return echo.NewHTTPError(http.StatusForbidden, "Insufficient permissions")
 			}
 			return next(c)
@@ -20,8 +20,8 @@ func CheckPermission(permission string) echo.MiddlewareFunc {
 	}
 }
 
-func hasPermission(role string, permission string) bool {
-	permissions, ok := auth.RolePermissions[role]
+func hasPermission(roleName string, permission string) bool {
+	permissions, ok := auth.RolePermissions[roleName]
 	if !ok {
 		return false
 	}

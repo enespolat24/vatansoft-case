@@ -10,6 +10,7 @@ import (
 
 type UserHandler struct {
 	UserRepository repository.UserRepository
+	RoleRepository repository.RoleRepository
 }
 
 func NewUserHandler(userRepository repository.UserRepository) *UserHandler {
@@ -17,13 +18,14 @@ func NewUserHandler(userRepository repository.UserRepository) *UserHandler {
 }
 
 type CreateUserRequest struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name     string `json:"name" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required"`
 }
 
 func (h *UserHandler) CreateUser(c echo.Context) error {
 	req := new(CreateUserRequest)
+
 	if err := c.Bind(req); err != nil {
 		return c.JSON(http.StatusBadRequest, err)
 	}

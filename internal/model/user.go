@@ -11,10 +11,10 @@ type User struct {
 	Name      string         `gorm:"column:name"`
 	Email     string         `gorm:"column:email"`
 	Password  string         `gorm:"column:password"`
+	RoleID    uint           `gorm:"column:role_id not null; default:1"`
 	CreatedAt time.Time      `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt time.Time      `gorm:"column:updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
-	RoleID    uint           `gorm:"not null"`
 	Role      Role           `gorm:"foreignKey:RoleID"`
 }
 type Role struct {
