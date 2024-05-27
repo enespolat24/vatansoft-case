@@ -14,4 +14,10 @@ type User struct {
 	CreatedAt time.Time      `gorm:"column:created_at;autoCreateTime"`
 	UpdatedAt time.Time      `gorm:"column:updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
+	RoleID    uint           `gorm:"not null"`
+	Role      Role           `gorm:"foreignKey:RoleID"`
+}
+type Role struct {
+	ID   uint   `gorm:"primaryKey"`
+	Name string `gorm:"unique;not null"`
 }
