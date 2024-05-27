@@ -8,6 +8,7 @@ import (
 
 type UserRepository interface {
 	CreateUser(user *model.User) error
+	GetUsers() ([]model.User, error)
 }
 
 type userRepository struct {
@@ -20,4 +21,12 @@ func NewUserRepository(db *gorm.DB) UserRepository {
 
 func (ur *userRepository) CreateUser(user *model.User) error {
 	return ur.db.Create(user).Error
+}
+
+func (ur *userRepository) GetUsers() ([]model.User, error) {
+	var users []model.User
+	if err := ur.db.Find(&users).Error; err != nil {
+		return nil, err
+	}
+	return users, nil
 }

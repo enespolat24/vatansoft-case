@@ -8,5 +8,5 @@ import (
 
 func InitRoutes(e *echo.Echo, h *handler.UserHandler) {
 	e.POST("/users", h.CreateUser)
-	// Add other routes here using the handler instance
+	e.GET("/users", h.GetUsers)
 }
