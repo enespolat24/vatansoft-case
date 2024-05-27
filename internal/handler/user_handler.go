@@ -52,3 +52,21 @@ func (h *UserHandler) GetUsers(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, users)
 }
+
+func (h *UserHandler) GetUser(c echo.Context) error {
+	id := c.Param("id")
+	user, err := h.UserRepository.GetUser(id)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, err)
+	}
+	return c.JSON(http.StatusOK, user)
+}
+
+func (h *UserHandler) DeleteUser(c echo.Context) error {
+	id := c.Param("id")
+	if err := h.UserRepository.DeleteUser(id); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+
+	return c.JSON(http.StatusOK, map[string]string{"message": "User deleted successfully"})
+}
