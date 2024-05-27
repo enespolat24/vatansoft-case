@@ -2,7 +2,6 @@ package handler
 
 import (
 	"net/http"
-	"time"
 	"vatansoft-case/internal/auth"
 	"vatansoft-case/internal/model"
 	"vatansoft-case/internal/repository"
@@ -47,11 +46,6 @@ func (ah *AuthHandler) Login(c echo.Context) error {
 	token, err := auth.GenerateToken(user.ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to generate token"})
-	}
-
-	expiresAt := time.Now().Add(time.Hour * 24 * 7) // Example: Token expires in 7 days
-	if err := auth.(user.ID, token, expiresAt); err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to save token"})
 	}
 
 	return c.JSON(http.StatusOK, map[string]string{"token": token})
