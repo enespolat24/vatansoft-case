@@ -15,6 +15,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -40,6 +41,9 @@ func main() {
 	routes.InitUserRoutes(e, userHandler)
 	routes.InitAuthRoutes(e, authHandler)
 	routes.InitPlanRoutes(e, planHandler)
+
+	//prometheus
+	e.GET("/metrics", echo.WrapHandler(promhttp.Handler()))
 
 	go func() {
 		if err := e.Start(":8080"); err != nil && err != http.ErrServerClosed {
