@@ -1,7 +1,13 @@
 package main
 
 import (
+	"context"
 	"log"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 	"vatansoft-case/internal/database"
 	"vatansoft-case/internal/handler"
 	"vatansoft-case/internal/repository"
@@ -35,5 +41,25 @@ func main() {
 	routes.InitAuthRoutes(e, authHandler)
 	routes.InitPlanRoutes(e, planHandler)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	go func() {
+		if err := e.Start(":8080"); err != nil && err != http.ErrServerClosed {
+			e.Logger.Fatalf("Error starting server: %v", err)
+		}
+	}()
+
+	// Graceful shutdown
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+
+	e.Logger.Print("Server is shutting down...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	if err := e.Shutdown(ctx); err != nil {
+		e.Logger.Fatal(err)
+	}
+
+	e.Logger.Print("Server shutdown completed")
 }
