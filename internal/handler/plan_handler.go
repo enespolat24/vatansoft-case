@@ -3,6 +3,7 @@ package handler
 import (
 	"errors"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 	"vatansoft-case/internal/model"
@@ -26,6 +27,16 @@ type CreatePlanRequest struct {
 	EndTime   string `json:"end_time"`
 	Title     string `json:"title"`
 	State     string `json:"state"`
+}
+
+type ChangeStateRequest struct {
+	State string `json:"state"`
+}
+
+type UpdatePlanRequest struct {
+	StartTime string `json:"start_time"`
+	EndTime   string `json:"end_time"`
+	Title     string `json:"title"`
 }
 
 func (ph *PlanHandler) CreatePlan(c echo.Context) error {
@@ -109,4 +120,109 @@ func getUserIdFromToken(tokenString string) (uint, error) {
 
 	userID := uint(claims["user_id"].(float64))
 	return userID, nil
+}
+
+func (ph *PlanHandler) ChangeState(c echo.Context) error {
+	planID := c.Param("id")
+
+	var req ChangeStateRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+	}
+
+	if !model.IsValidPlanState(string(model.PlanState(req.State))) {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid plan state"})
+	}
+
+	planIDUint, err := strconv.ParseUint(planID, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid plan ID"})
+	}
+
+	plan, err := ph.PlanRepository.GetPlanByID(uint(planIDUint))
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "plan not found"})
+	}
+
+	plan.State = model.PlanState(req.State)
+	if err := ph.PlanRepository.ChangeState(plan.ID, req.State); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to update plan"})
+	}
+
+	return c.JSON(http.StatusOK, plan)
+}
+
+func (ph *PlanHandler) UpdatePlan(c echo.Context) error {
+	planID := c.Param("id")
+
+	var req UpdatePlanRequest
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request body"})
+	}
+
+	planIDUint, err := strconv.ParseUint(planID, 10, 64)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid plan ID"})
+	}
+
+	plan, err := ph.PlanRepository.GetPlanByID(uint(planIDUint))
+	if err != nil {
+		return c.JSON(http.StatusNotFound, map[string]string{"error": "plan not found"})
+	}
+
+	if req.StartTime != "" {
+		startTime, err := time.Parse("2006-01-02 15:04", req.StartTime)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid start time format"})
+		}
+		plan.StartTime = startTime
+	}
+
+	if req.EndTime != "" {
+		endTime, err := time.Parse("2006-01-02 15:04", req.EndTime)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid end time format"})
+		}
+		plan.EndTime = endTime
+	}
+
+	if req.Title != "" {
+		plan.Title = req.Title
+	}
+
+	if err := ph.PlanRepository.UpdatePlan(plan); err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to update plan"})
+	}
+
+	return c.JSON(http.StatusOK, plan)
+}
+
+func (ph *PlanHandler) GetWeeklyPlans(c echo.Context) error {
+	tokenString := c.Request().Header.Get("Authorization")
+	userID, err := getUserIdFromToken(tokenString)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
+	}
+
+	weekStartDate := time.Now().Truncate(24*time.Hour).AddDate(0, 0, -int(time.Now().Weekday()))
+	plans, err := ph.PlanRepository.GetWeeklyPlansByUserID(userID, weekStartDate)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to fetch weekly plans"})
+	}
+	return c.JSON(http.StatusOK, plans)
+}
+
+func (ph *PlanHandler) GetMonthlyPlans(c echo.Context) error {
+	tokenString := c.Request().Header.Get("Authorization")
+	userID, err := getUserIdFromToken(tokenString)
+	if err != nil {
+		return c.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
+	}
+	monthStartDate := time.Now().Truncate(24*time.Hour).AddDate(0, 0, -time.Now().Day()+1)
+	plans, err := ph.PlanRepository.GetMonthlyPlansByUserID(userID, monthStartDate)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to fetch monthly plans"})
+	}
+
+	return c.JSON(http.StatusOK, plans)
 }

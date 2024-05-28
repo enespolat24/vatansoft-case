@@ -25,3 +25,12 @@ const (
 	StateInProgress PlanState = "in_progress"
 	StateCompleted  PlanState = "completed"
 )
+
+func IsValidPlanState(state string) bool {
+	switch state {
+	case "pending", "in_progress", "completed":
+		return true
+	default:
+		return false
+	}
+}
