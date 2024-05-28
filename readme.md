@@ -8,6 +8,8 @@
 * echo v4
 * prometheus for monitoring
 
+#### you can use postman collection in the ./postman_collection directory
+
 ## make sure you've created an .env file according to .env.example !!!
 
 ```cp .env.example .env```
@@ -24,4 +26,8 @@
 
 ### you can use docker instead of the command above, the default port of application is 80. you can visit:
 ```http://<docker-machine-ip>:80```
+
+
+### you can monitor application in prometheus endpoint
+```http://localhost:8080/metrics```
 
