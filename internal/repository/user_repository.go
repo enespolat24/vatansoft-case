@@ -11,7 +11,8 @@ type UserRepository interface {
 	GetUsers() ([]model.User, error)
 	UserExistsByEmail(email string) (*model.User, error)
 	GetUserByEmail(email string) (*model.User, error)
-	GetUser(id string) (*model.User, error)
+	GetUserById(id uint) (*model.User, error)
+	UpdateUser(user *model.User) error
 	DeleteUser(id string) error
 }
 
@@ -51,7 +52,7 @@ func (ur *userRepository) UserExistsByEmail(email string) (*model.User, error) {
 	return &user, nil
 }
 
-func (ur *userRepository) GetUser(id string) (*model.User, error) {
+func (ur *userRepository) GetUserById(id uint) (*model.User, error) {
 	var user model.User
 	if err := ur.db.First(&user, id).Error; err != nil {
 		return nil, err
@@ -71,4 +72,8 @@ func (ur *userRepository) DeleteUser(id string) error {
 	}
 
 	return nil
+}
+
+func (ur *userRepository) UpdateUser(user *model.User) error {
+	return ur.db.Save(user).Error
 }

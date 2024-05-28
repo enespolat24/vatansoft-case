@@ -1,15 +1,13 @@
 package handler
 
 import (
-	"errors"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
+	"vatansoft-case/internal/auth"
 	"vatansoft-case/internal/model"
 	"vatansoft-case/internal/repository"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo/v4"
 )
 
@@ -41,7 +39,7 @@ type UpdatePlanRequest struct {
 
 func (ph *PlanHandler) CreatePlan(c echo.Context) error {
 	tokenString := c.Request().Header.Get("Authorization")
-	userID, err := getUserIdFromToken(tokenString)
+	userID, err := auth.GetUserIdFromToken(tokenString)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
 	}
@@ -86,7 +84,7 @@ func (ph *PlanHandler) CreatePlan(c echo.Context) error {
 
 func (ph *PlanHandler) GetPlans(c echo.Context) error {
 	tokenString := c.Request().Header.Get("Authorization")
-	userID, err := getUserIdFromToken(tokenString)
+	userID, err := auth.GetUserIdFromToken(tokenString)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
 	}
@@ -97,29 +95,6 @@ func (ph *PlanHandler) GetPlans(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, plans)
-}
-
-func getUserIdFromToken(tokenString string) (uint, error) {
-	if tokenString == "" {
-		return 0, errors.New("missing Authorization header")
-	}
-
-	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
-
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return []byte("your-secret-key"), nil
-	})
-	if err != nil || !token.Valid {
-		return 0, errors.New("invalid or expired token")
-	}
-
-	claims, ok := token.Claims.(jwt.MapClaims)
-	if !ok {
-		return 0, errors.New("failed to parse claims")
-	}
-
-	userID := uint(claims["user_id"].(float64))
-	return userID, nil
 }
 
 func (ph *PlanHandler) ChangeState(c echo.Context) error {
@@ -199,7 +174,7 @@ func (ph *PlanHandler) UpdatePlan(c echo.Context) error {
 
 func (ph *PlanHandler) GetWeeklyPlans(c echo.Context) error {
 	tokenString := c.Request().Header.Get("Authorization")
-	userID, err := getUserIdFromToken(tokenString)
+	userID, err := auth.GetUserIdFromToken(tokenString)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
 	}
@@ -214,7 +189,7 @@ func (ph *PlanHandler) GetWeeklyPlans(c echo.Context) error {
 
 func (ph *PlanHandler) GetMonthlyPlans(c echo.Context) error {
 	tokenString := c.Request().Header.Get("Authorization")
-	userID, err := getUserIdFromToken(tokenString)
+	userID, err := auth.GetUserIdFromToken(tokenString)
 	if err != nil {
 		return c.JSON(http.StatusUnauthorized, map[string]string{"error": err.Error()})
 	}

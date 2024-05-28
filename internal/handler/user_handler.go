@@ -2,6 +2,7 @@ package handler
 
 import (
 	"net/http"
+	"strconv"
 	"vatansoft-case/internal/model"
 	"vatansoft-case/internal/repository"
 
@@ -57,7 +58,13 @@ func (h *UserHandler) GetUsers(c echo.Context) error {
 
 func (h *UserHandler) GetUser(c echo.Context) error {
 	id := c.Param("id")
-	user, err := h.UserRepository.GetUser(id)
+
+	ids, err := strconv.Atoi(id)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid user ID"})
+	}
+
+	user, err := h.UserRepository.GetUserById(uint(ids))
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, err)
 	}

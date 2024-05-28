@@ -1,6 +1,8 @@
 package auth
 
 import (
+	"errors"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
@@ -54,4 +56,27 @@ func VerifyToken(tokenString string) (*jwt.Token, error) {
 	}
 
 	return token, nil
+}
+
+func GetUserIdFromToken(tokenString string) (uint, error) {
+	if tokenString == "" {
+		return 0, errors.New("missing Authorization header")
+	}
+
+	tokenString = strings.Replace(tokenString, "Bearer ", "", 1)
+
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		return []byte("your-secret-key"), nil
+	})
+	if err != nil || !token.Valid {
+		return 0, errors.New("invalid or expired token")
+	}
+
+	claims, ok := token.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0, errors.New("failed to parse claims")
+	}
+
+	userID := uint(claims["user_id"].(float64))
+	return userID, nil
 }
