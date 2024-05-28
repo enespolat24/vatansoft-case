@@ -51,7 +51,7 @@ func (conn *DbConnection) CloseDbConnection() {
 }
 
 func (conn *DbConnection) AutoMigrate() error {
-	if err := conn.db.AutoMigrate(&model.User{}, &model.Role{}); err != nil {
+	if err := conn.db.AutoMigrate(&model.User{}, &model.Role{}, &model.Plan{}); err != nil {
 		return err
 	}
 	return nil

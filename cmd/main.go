@@ -26,11 +26,14 @@ func main() {
 	}
 
 	userRepo := repository.NewUserRepository(dbConn.GetDbInstance())
+	planRepo := repository.NewPlanRepository(dbConn.GetDbInstance())
 	userHandler := handler.NewUserHandler(userRepo)
 	authHandler := handler.NewAuthHandler(userRepo)
+	planHandler := handler.NewPlanHandler(planRepo)
 
 	routes.InitUserRoutes(e, userHandler)
 	routes.InitAuthRoutes(e, authHandler)
+	routes.InitPlanRoutes(e, planHandler)
 
 	e.Logger.Fatal(e.Start(":8080"))
 }

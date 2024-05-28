@@ -16,6 +16,7 @@ type User struct {
 	UpdatedAt time.Time      `gorm:"column:updated_at"`
 	DeletedAt gorm.DeletedAt `gorm:"column:deleted_at;index"`
 	Role      Role           `gorm:"foreignKey:RoleID"`
+	Plans     []Plan         `gorm:"foreignKey:UserID"`
 }
 type Role struct {
 	ID   uint   `gorm:"primaryKey"`

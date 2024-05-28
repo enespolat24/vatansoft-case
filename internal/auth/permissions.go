@@ -5,9 +5,9 @@ const (
 	PermissionUpdateUser = "update_user"
 	PermissionDeleteUser = "delete_user"
 
-	PermissionCreateLesson = "create_lesson"
-	PermissionUpdateLesson = "update_lesson"
-	PermissionDeleteLesson = "delete_lesson"
+	PermissionCreateLesson = "create_plan"
+	PermissionUpdateLesson = "update_plan"
+	PermissionDeleteLesson = "delete_plan"
 )
 
 var RolePermissions = map[string][]string{
